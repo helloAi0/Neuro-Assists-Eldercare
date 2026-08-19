@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypenedef="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>washroom_assist</name>
+  <version>0.1.0</version>
+  <description>Kinematic modeling, trajectory control, and sit-to-stand assist logic for System A</description>
+  <maintainer email="taha@todo.todo">Principal Robotics Engineer</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>eldercare_msgs</depend>
+  <depend>xacro</depend>
+  <depend>robot_state_publisher</depend>
+
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<robot name="washroom_assist_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- =================================================================== -->
+  <!-- CONSTANTS & PARAMETERS                                              -->
+  <!-- =================================================================== -->
+  <xacro:property name="PI" value="3.141592653589793"/>
+  <xacro:property name="base_mass" value="15.0"/>
+  <xacro:property name="link1_mass" value="4.5"/>
+  <xacro:property name="link2_mass" value="3.2"/>
+  <xacro:property name="handle_mass" value="1.0"/>
+
+  <!-- Material Palette -->
+  <material name="industrial_white">
+    <color rgba="0.9 0.9 0.92 1.0"/>
+  </material>
+  <material name="anodized_blue">
+    <color rgba="0.1 0.4 0.8 1.0"/>
+  </material>
+  <material name="safety_yellow">
+    <color rgba="1.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="padded_black">
+    <color rgba="0.15 0.15 0.15 1.0"/>
+  </material>
+
+  <!-- Macro for Cylinder Inertia -->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertia ixx="${(1/12) * m * (3*r*r + h*h)}" ixy="0.0" ixz="0.0"
+             iyy="${(1/12) * m * (3*r*r + h*h)}" iyz="0.0"
+             izz="${(1/2) * m * r * r}"/>
+  </xacro:macro>
+
+  <!-- =================================================================== -->
+  <!-- KINEMATIC CHAIN                                                     -->
+  <!-- =================================================================== -->
+
+  <!-- World Frame Ground Anchor -->
+  <link name="world"/>
+
+  <joint name="world_to_base_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Base Pillar Link -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.8"/>
+      </geometry>
+      <material name="industrial_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.8"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <mass value="${base_mass}"/>
+      <xacro:cylinder_inertia m="${base_mass}" r="0.12" h="0.8"/>
+    </inertial>
+  </link>
+
+  <!-- Joint 1: Base Turret Rotation (Yaw) -->
+  <joint name="shoulder_yaw_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="shoulder_link"/>
+    <origin xyz="0 0 0.8" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.5708" upper="1.5708" effort="120.0" velocity="0.8"/>
+    <dynamics damping="10.0" friction="2.0"/>
+  </joint>
+
+  <link name="shoulder_link">
+    <visual>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.09" length="0.2"/>
+      </geometry>
+      <material name="anodized_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.09" length="0.2"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <mass value="2.0"/>
+      <xacro:cylinder_inertia m="2.0" r="0.09" h="0.2"/>
+    </inertial>
+  </link>
+
+  <!-- Joint 2: Upper Arm Elevation (Pitch) -->
+  <joint name="shoulder_pitch_joint" type="revolute">
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.7854" upper="1.309" effort="200.0" velocity="0.5"/>
+    <dynamics damping="15.0" friction="5.0"/>
+  </joint>
+
+  <link name="upper_arm_link">
+    <visual>
+      <origin xyz="0.25 0 0" rpy="0 1.5708 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.5"/>
+      </geometry>
+      <material name="industrial_white"/>
+    </visual>
+    <collision>
+      <origin xyz="0.25 0 0" rpy="0 1.5708 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.5"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+      <mass value="${link1_mass}"/>
+      <xacro:cylinder_inertia m="${link1_mass}" r="0.06" h="0.5"/>
+    </inertial>
+  </link>
+
+  <!-- Joint 3: Forearm Extension (Pitch) -->
+  <joint name="elbow_pitch_joint" type="revolute">
+    <parent link="upper_arm_link"/>
+    <child link="forearm_link"/>
+    <origin xyz="0.5 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="0.7854" effort="150.0" velocity="0.5"/>
+    <dynamics damping="12.0" friction="3.0"/>
+  </joint>
+
+  <link name="forearm_link">
+    <visual>
+      <origin xyz="0.2 0 0" rpy="0 1.5708 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.4"/>
+      </geometry>
+      <material name="anodized_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0.2 0 0" rpy="0 1.5708 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.4"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.2 0 0" rpy="0 0 0"/>
+      <mass value="${link2_mass}"/>
+      <xacro:cylinder_inertia m="${link2_mass}" r="0.045" h="0.4"/>
+    </inertial>
+  </link>
+
+  <!-- End-Effector Handle Joint (Fixed End-Grip) -->
+  <joint name="handle_joint" type="fixed">
+    <parent link="forearm_link"/>
+    <child link="assist_handle_link"/>
+    <origin xyz="0.4 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="assist_handle_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.25"/>
+      </geometry>
+      <material name="padded_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.25"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${handle_mass}"/>
+      <xacro:cylinder_inertia m="${handle_mass}" r="0.03" h="0.25"/>
+    </inertial>
+  </link>
+
+  <!-- End-Effector Reference Frame for Kinematic Solvers -->
+  <joint name="ee_frame_joint" type="fixed">
+    <parent link="assist_handle_link"/>
+    <child link="ee_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="ee_link"/>
+
+</robot>
