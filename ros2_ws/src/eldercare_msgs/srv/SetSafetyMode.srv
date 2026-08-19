@@ -1,0 +1,10 @@
+# Request Definition
+uint8 target_state
+string reason
+bool force_override
+---
+# Response Definition
+bool success
+uint8 previous_state
+uint8 new_state
+string message
